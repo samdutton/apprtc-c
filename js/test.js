@@ -1,33 +1,31 @@
 'use strict';
 
-var button = document.querySelector('button');
-var div = document.querySelector('div#receivedMessage');
-var input = document.querySelector('input');
-
-// var websocket = new WebSocket('wss://echo.websocket.org/');
+// var button = document.querySelector('button');
+// var div = document.querySelector('div#receivedMessage');
+// var input = document.querySelector('input');
 
 // doesn't work with wss :^|
-var websocket = new WebSocket('ws://sockets.mbed.org/ws/foo/rw');
+var ws = new WebSocket('ws://sockets.mbed.org/ws/foo/rw');
+// button.onclick = function(){ws.send(input.value);};
 
-websocket.onopen = function(event) {
+ws.onclose = function(event) {
+  onChannelClosed();
+  console.log('close', event, event.data);
+};
+
+ws.onerror = function(event) {
+  onChannelError(event.data);
+  console.log('error', event, event.data);
+};
+
+ws.onmessage = function(event) {
+  onChannelMessage(event.data);
+  console.log('message', event, event.data);
+  //  div.textContent += event.data + ' ';
+};
+
+ws.onopen = function(event) {
+  onChannelOpened();
   console.log('open', event);
 };
 
-websocket.onclose = function(event) {
-  console.log('close', event);
-};
-
-websocket.onmessage = function(event) {
-  console.log('message', event, event.data);
-  div.textContent += event.data + ' ';
-};
-
-websocket.onerror = function(event) {
-  console.log('error', event.data);
-};
-
-function send(message) {
-  websocket.send(message);
-}
-
-button.onclick = function(){send(input.value);};

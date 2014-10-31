@@ -10,9 +10,9 @@
 
 // Directives for JSHint checking (see jshint.com/docs/options).
 // globals: variables defined in apprtc/index.html
-/* globals audioRecvBitrate, audioRecvCodec, audioSendBitrate, audioSendCodec, channelToken, goog, initiator:true, me, mediaConstraints, offerConstraints, opusfec, opusMaxPbr, pcConfig, pcConstraints, roomKey, roomLink, setupStereoscopic, stereo, stereoscopic, turnUrl, videoRecvBitrate, videoSendBitrate, videoSendInitialBitrate:true */
+/* globals chrome, setupStereoscopic, videoSendInitialBitrate:true, ws: true */
 // exported: functions used in apprtc/index.html
-/* exported enterFullScreen, initialize, onHangup */
+/* exported enterFullScreen, initialize, onChannelClosed, onChannelError, onChannelMessage, onChannelOpened, onHangup */
 
 'use strict';
 
@@ -20,16 +20,15 @@ var audioRecvBitrate = '';
 var audioRecvCodec = 'opus/48000';
 var audioSendBitrate = '';
 var audioSendCodec = '';
-var channelToken = '6913bcaa3de71fd5f23d0449c08c39f7-channel-4270294294-1414681079-81160258/68808656';
 var errorMessages = [];
 var initiator = 0;
-var me = '68808656';
-var mediaConstraints = {"audio": true, "video": {"mandatory": {}, "optional": [{"minWidth": "1280"}, {"minHeight": "720"}]}};
-var offerConstraints = {"mandatory": {}, "optional": []};
+// var me = '68808656';
+var mediaConstraints = {'audio': true, 'video': {'mandatory': {}, 'optional': [{'minWidth': '1280'}, {'minHeight': '720'}]}};
+var offerConstraints = {'mandatory': {}, 'optional': []};
 var opusfec = true;
 var opusMaxPbr = '';
-var pcConfig = {"iceServers": [{"urls": "stun:stun.l.google.com:19302"}]};
-var pcConstraints = {"optional": [{"googImprovedWifiBwe": true}]};
+var pcConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
+var pcConstraints = {'optional': [{'googImprovedWifiBwe': true}]};
 var roomKey = '81160258';
 var roomLink = 'http://localhost:13080/?r=81160258';
 var stereo = false;
@@ -87,6 +86,7 @@ var turnDone = false;
 var xmlhttp;
 
 function initialize() {
+  console.log('initialize');
   console.log(errorMessages);
   if (errorMessages.length > 0) {
     for (var i = 0; i < errorMessages.length; ++i) {
@@ -202,6 +202,7 @@ function createPeerConnection() {
 }
 
 function maybeStart() {
+  console.log('maybeStart()', started, signalingReady, channelReady, turnDone, localStream);
   if (!started && signalingReady && channelReady && turnDone &&
       (localStream || !hasLocalStream)) {
     startTime = window.performance.now();
@@ -308,16 +309,18 @@ function setRemote(message) {
   }
 }
 
-
 function sendMessage(message) {
   var msgString = JSON.stringify(message);
   trace('C->S: ' + msgString);
-  // NOTE: AppRTCClient.java searches & parses this line; update there when
-  // changing here.
-  var path = '/message?r=' + roomKey + '&u=' + me;
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', path, true);
-  xhr.send(msgString);
+  ws.send(msgString);
+  // var msgString = JSON.stringify(message);
+  // trace('C->S: ' + msgString);
+  // // NOTE: AppRTCClient.java searches & parses this line; update there when
+  // // changing here.
+  // var path = '/message?r=' + roomKey + '&u=' + me;
+  // var xhr = new XMLHttpRequest();
+  // xhr.open('POST', path, true);
+  // xhr.send(msgString);
 }
 
 function processSignalingMessage(message) {
@@ -1051,11 +1054,17 @@ function setDefaultCodec(mLine, payload) {
 
 // Send a BYE on refreshing or leaving a page
 // to ensure the room is cleaned up for the next session.
-window.onbeforeunload = function() {
-  sendMessage({
-    type: 'bye'
-  });
-};
+// window.onbeforeunload = function() {
+//   sendMessage({
+//     type: 'bye'
+//   });
+// };
+// window.onbeforeunload is not available to Chrome apps
+chrome.app.window.onClosed.addListener(function(){
+  sendMessage({type: 'bye'});
+});
+
+
 
 function displaySharingInfo() {
   sharingDiv.classList.add('active');
