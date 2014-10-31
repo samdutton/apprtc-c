@@ -1,23 +1,22 @@
 'use strict';
 
-var uri = "ws://localhost:9000/daemon.php";
-var websocket = new WebSocket(uri);
+var websocket = new WebSocket('ws://echo.websocket.org/');
 
 websocket.onopen = function(event) {
-  alert('Connected to server ');
+  console.log(event);
+  var message = 'This is a test message';
+  websocket.send(message);
 }
 
 websocket.onclose = function(event) {
-  alert('Disconnected');
+  console.log(event);
 };
 
 websocket.onmessage = function(event) {
-  alert('Message '+event.data);
+  console.log(event, event.data);
 };
 
 websocket.onerror = function(event) {
-  alert('Error '+event.data);
+  console.log('Error: '+ event.data);
 };
 
-var message = 'This is a test message';
-websocket.send(message);
