@@ -1,12 +1,9 @@
 'use strict';
 
-// var button = document.querySelector('button');
-// var div = document.querySelector('div#receivedMessage');
-// var input = document.querySelector('input');
+/* globals onChannelClosed, onChannelError, onChannelMessage, onChannelOpened */
 
-// doesn't work with wss :^|
+// doesn't work with wss :^(
 var ws = new WebSocket('ws://sockets.mbed.org/ws/foo/rw');
-// button.onclick = function(){ws.send(input.value);};
 
 ws.onclose = function(event) {
   onChannelClosed();
@@ -19,13 +16,9 @@ ws.onerror = function(event) {
 };
 
 ws.onmessage = function(event) {
-  onChannelMessage(event.data);
-  console.log('message', event, event.data);
-  //  div.textContent += event.data + ' ';
+  onChannelMessage(event);
 };
 
-ws.onopen = function(event) {
+ws.onopen = function() {
   onChannelOpened();
-  console.log('open', event);
 };
-

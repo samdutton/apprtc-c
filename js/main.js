@@ -6,7 +6,7 @@
  *  tree.
  */
 
-/* More information about these options at jshint.com/docs/options */
+ /* More information about these options at jshint.com/docs/options */
 
 // Directives for JSHint checking (see jshint.com/docs/options).
 // globals: variables defined in apprtc/index.html
@@ -29,8 +29,8 @@ var opusfec = true;
 var opusMaxPbr = '';
 var pcConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
 var pcConstraints = {'optional': [{'googImprovedWifiBwe': true}]};
-var roomKey = '81160258';
-var roomLink = 'http://localhost:13080/?r=81160258';
+// var roomKey = '81160258';
+// var roomLink = 'http://localhost:13080/?r=81160258';
 var stereo = false;
 var stereoscopic = '';
 var turnUrl = 'https://computeengineondemand.appspot.com/turn?username=68808656&key=4080218913';
@@ -39,7 +39,6 @@ var videoSendBitrate = '';
 var videoSendInitialBitrate = '';
 
 setTimeout(initialize, 1);
-
 
 var infoDiv = document.querySelector('div#info');
 var localVideo = document.querySelector('video#localVideo');
@@ -86,21 +85,20 @@ var turnDone = false;
 var xmlhttp;
 
 function initialize() {
-  console.log('initialize');
-  console.log(errorMessages);
   if (errorMessages.length > 0) {
     for (var i = 0; i < errorMessages.length; ++i) {
-      window.alert(errorMessages[i]);
+      // can't use window.alert from Chrome app
+      // window.alert(errorMessages[i]);
+      console.log('errorMessages: ', errorMessages);
     }
     return;
   }
 
   document.body.ondblclick = toggleFullScreen;
 
-  trace('Initializing; room=' + roomKey + '.');
+//  trace('Initializing; room=' + roomKey + '.');
 
-  // openChannel();
-  maybeRequestTurn();
+maybeRequestTurn();
 
   // Caller is always ready to create peerConnection.
   signalingReady = initiator;
@@ -108,11 +106,11 @@ function initialize() {
   if (mediaConstraints.audio === false &&
       mediaConstraints.video === false) {
     hasLocalStream = false;
-    maybeStart();
-  } else {
-    hasLocalStream = true;
-    doGetUserMedia();
-  }
+  maybeStart();
+} else {
+  hasLocalStream = true;
+  doGetUserMedia();
+}
 }
 
 function maybeRequestTurn() {
@@ -133,9 +131,9 @@ function maybeRequestTurn() {
   if (currentDomain.search('localhost') === -1 &&
       currentDomain.search('apprtc') === -1) {
     // Not authorized domain. Try with default STUN instead.
-    turnDone = true;
-    return;
-  }
+  turnDone = true;
+  return;
+}
 
   // No TURN server. Get one from computeengineondemand.appspot.com.
   xmlhttp = new XMLHttpRequest();
@@ -153,16 +151,16 @@ function onTurnResult() {
     var turnServer = JSON.parse(xmlhttp.responseText);
     // Create turnUris using the polyfill (adapter.js).
     var iceServers = createIceServers(turnServer.uris,
-        turnServer.username, turnServer.password);
+                                      turnServer.username, turnServer.password);
     if (iceServers !== null) {
       pcConfig.iceServers = pcConfig.iceServers.concat(iceServers);
     }
   } else {
     var subject = encodeURIComponent('AppRTC demo TURN server not working');
     displayStatus('No TURN server; unlikely that media will traverse networks. ' +
-        'If this persists please <a href="mailto:discuss-webrtc@googlegroups.com?' +
-        'subject=' + subject + '">' +
-        'report it to discuss-webrtc@googlegroups.com</a>.');
+                  'If this persists please <a href="mailto:discuss-webrtc@googlegroups.com?' +
+                  'subject=' + subject + '">' +
+                  'report it to discuss-webrtc@googlegroups.com</a>.');
   }
   // If TURN request failed, continue the call with default STUN.
   turnDone = true;
@@ -175,7 +173,7 @@ function doGetUserMedia() {
     displayStatus('Calling getUserMedia()...');
     getUserMedia(mediaConstraints, onUserMediaSuccess, onUserMediaError);
     trace('Requested access to local media with mediaConstraints:\n' +
-        '  \'' + JSON.stringify(mediaConstraints) + '\'');
+          '  \'' + JSON.stringify(mediaConstraints) + '\'');
   } catch (e) {
     alert('getUserMedia() failed. Is this a WebRTC capable browser?');
     displayError('getUserMedia failed with exception: ' + e.message);
@@ -188,8 +186,8 @@ function createPeerConnection() {
     pc = new RTCPeerConnection(pcConfig, pcConstraints);
     pc.onicecandidate = onIceCandidate;
     trace('Created RTCPeerConnnection with:\n' +
-        '  config: \'' + JSON.stringify(pcConfig) + '\';\n' +
-        '  constraints: \'' + JSON.stringify(pcConstraints) + '\'.');
+          '  config: \'' + JSON.stringify(pcConfig) + '\';\n' +
+          '  constraints: \'' + JSON.stringify(pcConstraints) + '\'.');
   } catch (e) {
     displayError('Failed to create PeerConnection, exception: ' + e.message);
     alert('Cannot create RTCPeerConnection object; WebRTC is not supported by this browser.');
@@ -202,36 +200,37 @@ function createPeerConnection() {
 }
 
 function maybeStart() {
-  console.log('maybeStart()', started, signalingReady, channelReady, turnDone, localStream);
+  // console.log('maybeStart() !started:', !started, ', signalingReady: ', signalingReady, ', channelReady: ', channelReady, ', turnDone: ', turnDone, ', (localStream || !hasLocalStream): ', (localStream || !hasLocalStream));
   if (!started && signalingReady && channelReady && turnDone &&
       (localStream || !hasLocalStream)) {
-    startTime = window.performance.now();
-    displayStatus('Connecting...');
-    trace('Creating PeerConnection.');
-    createPeerConnection();
+    console.log('maybeStart() starting');
+  startTime = window.performance.now();
+  displayStatus('Connecting...');
+  trace('Creating PeerConnection.');
+  createPeerConnection();
 
-    if (hasLocalStream) {
-      trace('Adding local stream.');
-      pc.addStream(localStream);
-    } else {
-      trace('Not sending any stream.');
-    }
-    started = true;
-
-    if (initiator) {
-      doCall();
-    } else {
-      calleeStart();
-    }
+  if (hasLocalStream) {
+    trace('Adding local stream.');
+    pc.addStream(localStream);
+  } else {
+    trace('Not sending any stream.');
   }
+  started = true;
+
+  if (initiator) {
+    doCall();
+  } else {
+    calleeStart();
+  }
+}
 }
 
 function doCall() {
   var constraints = mergeConstraints(offerConstraints, sdpConstraints);
   trace('Sending offer to peer, with constraints: \n\'' +
-      JSON.stringify(constraints) + '\'.');
+        JSON.stringify(constraints) + '\'.');
   pc.createOffer(setLocalAndSendMessage,
-      onCreateSessionDescriptionError, constraints);
+                 onCreateSessionDescriptionError, constraints);
 }
 
 function calleeStart() {
@@ -244,7 +243,7 @@ function calleeStart() {
 function doAnswer() {
   trace('Sending answer to peer.');
   pc.createAnswer(setLocalAndSendMessage,
-      onCreateSessionDescriptionError, sdpConstraints);
+                  onCreateSessionDescriptionError, sdpConstraints);
 }
 
 function mergeConstraints(cons1, cons2) {
@@ -261,7 +260,7 @@ function setLocalAndSendMessage(sessionDescription) {
   sessionDescription.sdp = maybeSetAudioReceiveBitRate(sessionDescription.sdp);
   sessionDescription.sdp = maybeSetVideoReceiveBitRate(sessionDescription.sdp);
   pc.setLocalDescription(sessionDescription,
-      onSetSessionDescriptionSuccess, onSetSessionDescriptionError);
+                         onSetSessionDescriptionSuccess, onSetSessionDescriptionError);
   sendMessage(sessionDescription);
 }
 
@@ -276,14 +275,14 @@ function setRemote(message) {
   // Set Opus maxplaybackrate, if requested.
   if (opusMaxPbr) {
     message.sdp = addCodecParam(message.sdp, 'opus/48000', 'maxplaybackrate=' +
-        opusMaxPbr);
+                                opusMaxPbr);
   }
   message.sdp = maybePreferAudioSendCodec(message.sdp);
   message.sdp = maybeSetAudioSendBitRate(message.sdp);
   message.sdp = maybeSetVideoSendBitRate(message.sdp);
   message.sdp = maybeSetVideoSendInitialBitRate(message.sdp);
   pc.setRemoteDescription(new RTCSessionDescription(message),
-      onSetRemoteDescriptionSuccess, onSetSessionDescriptionError);
+                          onSetRemoteDescriptionSuccess, onSetSessionDescriptionError);
 
   function onSetRemoteDescriptionSuccess() {
     trace('Set remote session description success.');
@@ -300,8 +299,8 @@ function setRemote(message) {
     if (remoteStreams.length > 0 &&
         remoteStreams[0].getVideoTracks().length > 0) {
       trace('Waiting for remote video.');
-      waitForRemoteVideo();
-    } else {
+    waitForRemoteVideo();
+  } else {
       // TODO(juberti): Make this wait for ICE connection before transitioning.
       trace('No remote video stream; not waiting for media to arrive.');
       transitionToActive();
@@ -309,18 +308,13 @@ function setRemote(message) {
   }
 }
 
+// temporary hack to generate 'unique' ID
+var clientId = Date.now();
 function sendMessage(message) {
+  message.clientId = clientId;
   var msgString = JSON.stringify(message);
   trace('C->S: ' + msgString);
   ws.send(msgString);
-  // var msgString = JSON.stringify(message);
-  // trace('C->S: ' + msgString);
-  // // NOTE: AppRTCClient.java searches & parses this line; update there when
-  // // changing here.
-  // var path = '/message?r=' + roomKey + '&u=' + me;
-  // var xhr = new XMLHttpRequest();
-  // xhr.open('POST', path, true);
-  // xhr.send(msgString);
 }
 
 function processSignalingMessage(message) {
@@ -341,7 +335,7 @@ function processSignalingMessage(message) {
     });
     noteIceCandidate('Remote', iceCandidateType(message.candidate));
     pc.addIceCandidate(candidate,
-        onAddIceCandidateSuccess, onAddIceCandidateError);
+                       onAddIceCandidateSuccess, onAddIceCandidateError);
   } else if (message.type === 'bye') {
     onRemoteHangup();
   }
@@ -364,6 +358,11 @@ function onChannelOpened() {
 function onChannelMessage(message) {
   trace('S->C: ' + message.data);
   var msg = JSON.parse(message.data);
+  // disregard messages from self
+  if (msg.clientId === clientId) {
+    return;
+  }
+
   // Since the turn response is async and also GAE might disorder the
   // Message delivery due to possible datastore query at server side,
   // So callee needs to cache messages before peerConnection is created.
@@ -407,7 +406,7 @@ function onUserMediaSuccess(stream) {
 
 function onUserMediaError(error) {
   var errorMessage = 'Failed to get access to local media. Error name was ' +
-      error.name + '. Continuing without sending a stream.';
+  error.name + '. Continuing without sending a stream.';
   displayError(errorMessage);
   alert(errorMessage);
 
@@ -430,13 +429,13 @@ function onSetSessionDescriptionError(error) {
 function iceCandidateType(candidateSDP) {
   switch (candidateSDP.split(' ')[7]) {
     case 'host':
-      return 'HOST';
+    return 'HOST';
     case 'srflx':
-      return 'STUN';
+    return 'STUN';
     case 'relay':
-      return 'TURN';
+    return 'TURN';
     default:
-      return 'UNKNOWN';
+    return 'UNKNOWN';
   }
 }
 
@@ -636,8 +635,8 @@ function transitionToDone() {
   localVideo.classList.remove('active');
   remoteVideo.classList.remove('active');
   miniVideo.classList.remove('active');
-  displayStatus('You have left the call. <a href=\'' + roomLink +
-      '\'>Click here</a> to rejoin.');
+  // displayStatus('You have left the call. <a href=\'' + roomLink +
+  //     '\'>Click here</a> to rejoin.');
 }
 
 function noteIceCandidate(location, type) {
@@ -674,10 +673,10 @@ function updateInfoDiv() {
     // Obtain any needed values from stats.
     var rtt = extractStatAsInt(stats, 'ssrc', 'googRtt');
     var captureStart = extractStatAsInt(stats, 'ssrc',
-        'googCaptureStartNtpTimeMs');
+                                        'googCaptureStartNtpTimeMs');
     var e2eDelay = computeE2EDelay(captureStart, remoteVideo.currentTime);
     var activeCandPair = getStatsReport(stats, 'googCandidatePair',
-        'googActiveConnection', 'true');
+                                        'googActiveConnection', 'true');
     var localAddr, remoteAddr;
     if (activeCandPair) {
       localAddr = activeCandPair.stat('googLocalAddress');
@@ -708,7 +707,7 @@ function updateInfoDiv() {
 
     if (endTime !== null) {
       contents += buildLine('Setup time',
-          (endTime - startTime).toFixed(0).toString() + 'ms');
+                            (endTime - startTime).toFixed(0).toString() + 'ms');
     }
     if (rtt !== null) {
       contents += buildLine('RTT', rtt.toString() + 'ms');
@@ -815,20 +814,20 @@ document.onkeydown = function(event) {
   }
   switch (event.keyCode) {
     case 68:
-      toggleAudioMute();
-      toggleRemoteVideoElementMuted();
-      return false;
+    toggleAudioMute();
+    toggleRemoteVideoElementMuted();
+    return false;
     case 69:
-      toggleVideoMute();
-      return false;
+    toggleVideoMute();
+    return false;
     case 72:
-      hangup();
-      return false;
+    hangup();
+    return false;
     case 73:
-      toggleInfoDiv();
-      return false;
+    toggleInfoDiv();
+    return false;
     default:
-      return;
+    return;
   }
 };
 
@@ -883,7 +882,7 @@ function preferBitRate(sdp, bitrate, mediaType) {
 
   // Find c-line corresponding to the m-line.
   var cLineIndex = findLineInRange(sdpLines, mLineIndex + 1,
-      nextMLineIndex, 'c=');
+                                   nextMLineIndex, 'c=');
   if (cLineIndex === null) {
     displayError('Failed to add bandwidth line to sdp, as no c-line found');
     return sdp;
@@ -891,7 +890,7 @@ function preferBitRate(sdp, bitrate, mediaType) {
 
   // Check if bandwidth line already exists between c-line and next m-line.
   var bLineIndex = findLineInRange(sdpLines, cLineIndex + 1,
-      nextMLineIndex, 'b=AS');
+                                   nextMLineIndex, 'b=AS');
   if (bLineIndex) {
     sdpLines.splice(bLineIndex, 1);
   }
@@ -917,7 +916,7 @@ function maybeSetVideoSendInitialBitRate(sdp) {
   if (videoSendBitrate) {
     if (videoSendInitialBitrate > videoSendBitrate) {
       displayError('Clamping initial bitrate to max bitrate of ' +
-          videoSendBitrate + ' kbps.');
+                   videoSendBitrate + ' kbps.');
       videoSendInitialBitrate = videoSendBitrate;
     }
     maxBitrate = videoSendBitrate;
@@ -935,8 +934,8 @@ function maybeSetVideoSendInitialBitRate(sdp) {
   var vp8RtpmapIndex = findLine(sdpLines, 'a=rtpmap', 'VP8/90000');
   var vp8Payload = getCodecPayloadType(sdpLines[vp8RtpmapIndex]);
   var vp8Fmtp = 'a=fmtp:' + vp8Payload + ' x-google-min-bitrate=' +
-      videoSendInitialBitrate.toString() + '; x-google-max-bitrate=' +
-      maxBitrate.toString();
+  videoSendInitialBitrate.toString() + '; x-google-max-bitrate=' +
+  maxBitrate.toString();
   sdpLines.splice(vp8RtpmapIndex + 1, 0, vp8Fmtp);
   return sdpLines.join('\r\n');
 }
@@ -1023,10 +1022,10 @@ function findLineInRange(sdpLines, startLine, endLine, prefix, substr) {
       if (!substr ||
           sdpLines[i].toLowerCase().indexOf(substr.toLowerCase()) !== -1) {
         return i;
-      }
     }
   }
-  return null;
+}
+return null;
 }
 
 // Gets the codec payload type from an a=rtpmap:X line.
@@ -1054,17 +1053,10 @@ function setDefaultCodec(mLine, payload) {
 
 // Send a BYE on refreshing or leaving a page
 // to ensure the room is cleaned up for the next session.
-// window.onbeforeunload = function() {
-//   sendMessage({
-//     type: 'bye'
-//   });
-// };
 // window.onbeforeunload is not available to Chrome apps
 chrome.app.window.onClosed.addListener(function(){
   sendMessage({type: 'bye'});
 });
-
-
 
 function displaySharingInfo() {
   sharingDiv.classList.add('active');
@@ -1113,3 +1105,27 @@ function toggleFullScreen() {
     trace(event);
   }
 }
+
+// Code added for signaling via WebSocket
+
+// room name is foo, rw = read+write access
+// doesn't work with wss :^\
+var ws = new WebSocket('ws://sockets.mbed.org/ws/foo/rw');
+
+ws.onclose = function() {
+  onChannelClosed();
+};
+
+ws.onerror = function(event) {
+  onChannelError(event.data);
+};
+
+ws.onmessage = function(event) {
+  onChannelMessage(event);
+};
+
+ws.onopen = function() {
+  onChannelOpened();
+};
+
+// End code added for signaling via WebSocket

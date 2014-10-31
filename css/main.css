@@ -87,16 +87,17 @@ footer > div {
   background-color: black;
   bottom: 0;
   color: white;
-  font-size: 0.9em;
+  font-size: 1.5em;
   font-weight: 300;
-  line-height: 2em;
+  line-height: 1.2em;
   max-height: 80%;
   opacity: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   padding: 10px;
   position: absolute;
   transition: opacity 1s;
   width: calc(100% - 20px);
+  word-break: break-word;
 }
 
 footer > div.active {
