@@ -137,6 +137,10 @@ label {
   margin: 0 10px 0 0;
 }
 
+pre {
+  white-space: pre-wrap;
+}
+
 video#localVideo {
   height: 100%;
   max-height: 100%;
