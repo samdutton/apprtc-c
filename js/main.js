@@ -84,7 +84,10 @@ var stats;
 var turnDone = false;
 var xmlhttp;
 
+
+
 function initialize() {
+
   if (errorMessages.length > 0) {
     for (var i = 0; i < errorMessages.length; ++i) {
       // can't use window.alert from Chrome app
@@ -352,6 +355,7 @@ function onAddIceCandidateError(error) {
 function onChannelOpened() {
   trace('Channel opened.');
   channelReady = true;
+  sendMessage({'type': 'ping'});
   maybeStart();
 }
 
@@ -360,6 +364,14 @@ function onChannelMessage(message) {
   var msg = JSON.parse(message.data);
   // disregard messages from self
   if (msg.clientId === clientId) {
+    return;
+  }
+
+  if (msg.type === 'ping') {
+    // only second client will receive ping
+    initiator = 1;
+    signalingReady = true;
+    maybeStart();
     return;
   }
 
