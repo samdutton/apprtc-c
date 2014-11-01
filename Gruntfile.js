@@ -11,59 +11,47 @@ module.exports = function(grunt) {
 
     csslint: {
       options: {
-        csslintrc: 'samples/web/.csslintrc'
+        csslintrc: '.csslintrc'
       },
       strict: {
         options: {
           import: 2
         },
-        src: ['samples/web/content/**/*.css']
+        src: ['**/css/*.css']
       },
       lax: {
         options: {
           import: false
         },
-        src: ['samples/web/content/**/*.css']
+        src: ['**/css/*.css']
       }
     },
 
     htmlhint: {
       html1: {
-        src: ['samples/web/content/apprtc/index.html',
-        'samples/web/content/datachannel/index.html',
-        'samples/web/content/getusermedia/**/index.html',
-        'samples/web/content/peerconnection/**/index.html']
+        src: ['index.html']
       }
     },
 
     jscs: {
-      src: 'samples/web/content/**/*.js',
+      src: 'js/**/*.js',
       options: {
         config: 'google', // as per Google style guide – could use '.jscsrc' instead
-        'excludeFiles': ['samples/web/content/manual-test/**/*',
-        'samples/web/content/testrtc/**/*',
-        'samples/web/content/apprtc/js/vr.js',
-        'samples/web/content/apprtc/js/stereoscopic.js',
-        'samples/web/content/getusermedia/desktopcapture/extension/content-script.js'],
+        'excludeFiles': [],
         requireCurlyBraces: ['if']
       }
     },
 
     jshint: {
       options: {
-        ignores: ['samples/web/content/manual-test/**/*',
-        'samples/web/content/testrtc/**/*',
-        'samples/web/content/getusermedia/desktopcapture/**',
-        'samples/web/content/apprtc/js/stereoscopic.js',
-        'samples/web/content/apprtc/js/ga.js',
-        'samples/web/content/apprtc/js/vr.js'],
+        ignores: [],
         // use default .jshintrc files
         jshintrc: true
       },
       // files to validate
       // can choose more than one name + array of paths
       // usage with this name: grunt jshint:files
-      files: ['samples/web/content/**/*.js']
+      files: ['js/**/*.js']
     },
 
   });

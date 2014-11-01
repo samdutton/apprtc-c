@@ -77,9 +77,10 @@ div#videos {
 }
 
 div#videos.active {
-  -webkit-transform: rotateY(180deg);
   -moz-transform: rotateY(180deg);
+  -ms-transform: rotateY(180deg);
   -o-transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
   transform: rotateY(180deg);
 }
 
@@ -97,7 +98,7 @@ footer > div {
   position: absolute;
   transition: opacity 1s;
   width: calc(100% - 20px);
-  word-break: break-word;
+  word-break: break-all;
 }
 
 footer > div.active {
@@ -107,10 +108,12 @@ footer > div.active {
 @-webkit-keyframes rotate {
   0% {
     -webkit-transform: rotateY(0);
+    transform: rotateY(0);
   }
 
   100% {
     -webkit-transform: rotateY(180deg);
+    transform: rotateY(180deg);
   }
 }
 
@@ -139,8 +142,11 @@ video#localVideo {
   max-height: 100%;
   max-width: 100%;
   transition: opacity 1s;
-  transform: scale(-1, 1);
+  -moz-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
   -webkit-transform: scale(-1, 1);
+  transform: scale(-1, 1);
   width: 100%;
 }
 
@@ -167,9 +173,10 @@ video#remoteVideo {
   max-width: 100%;
   opacity: 0;
   position: absolute;
-  -webkit-transform: rotateY(180deg);
   -moz-transform: rotateY(180deg);
+  -ms-transform: rotateY(180deg);
   -o-transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
   transform: rotateY(180deg);
   transition: opacity 1s;
   width: 100%;

@@ -11,6 +11,7 @@
   "unused": "strict",
   "globals": {
     "attachMediaStream": true,
+    "chrome": true,
     "createIceServer": true,
     "createIceServers": true,
     "getUserMedia": true,
